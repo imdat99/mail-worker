@@ -1,5 +1,6 @@
 import { WorkerMailer } from 'worker-mailer';
 import { emailOptionsSchema } from './z-valid';
+import { otpTemplate } from './template/otp';
 
 export interface Env {
   // Thêm các khai báo biến môi trường của bạn vào đây
@@ -13,11 +14,13 @@ export default {
     if (request.method !== 'POST') {
       return new Response('Bad request', { status: 405 })
     }
-
     try {
       const body = await request.json()
       const email = emailOptionsSchema.parse(body) 
-
+      if(request.url.includes('otp')){
+        const otpMail = otpTemplate(email.text || Math.random().toString(36).substring(2, 8))
+        Object.assign(email, otpMail)
+      }
       const mailer = await WorkerMailer.connect({
         credentials: {
           username: env.USERNAME,
