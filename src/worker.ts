@@ -1,4 +1,4 @@
-import { WorkerMailer } from 'worker-mailer';
+import { EmailOptions, WorkerMailer } from 'worker-mailer';
 import { emailOptionsSchema } from './z-valid';
 import { otpTemplate } from './template/otp';
 
@@ -16,9 +16,9 @@ export default {
     }
     try {
       const body = await request.json()
-      const email = emailOptionsSchema.parse(body) 
+      const email = emailOptionsSchema.parse(body) as EmailOptions; 
       if(request.url.includes('otp')){
-        const otpMail = otpTemplate(email.text || Math.random().toString(36).substring(2, 8))
+        const otpMail = otpTemplate(email)
         Object.assign(email, otpMail)
       }
       const mailer = await WorkerMailer.connect({
